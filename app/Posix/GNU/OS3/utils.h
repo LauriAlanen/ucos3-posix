@@ -1,11 +1,13 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "includes.h"
 #include <stdio.h>
 #include <sys/time.h>
 #include <time.h>
-#include "includes.h"
 #include <unistd.h>
+#include <termios.h>
+#include <fcntl.h>
 
 #define  COLOR_BLACK     0         /* VT102 Color Codes  */
 #define  COLOR_RED       1

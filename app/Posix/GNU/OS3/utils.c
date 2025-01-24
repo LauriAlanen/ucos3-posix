@@ -15,7 +15,38 @@ CPU_INT32U          RndNext;          /* Used by random generator */
 OS_SEM DispStrSem;
 
 static struct timeval _t;
-int PC_GetKey(void* x) { return 0; }
+
+int PC_GetKey(void *x) 
+{
+    struct termios oldt, newt;
+    int oldf;
+    int ch;
+
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO); // Disable canonical mode and echo
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
+    oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+
+    ch = getchar();
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    fcntl(STDIN_FILENO, F_SETFL, oldf);
+
+    if (ch != EOF) 
+    {
+        if (x != NULL) 
+        {
+            *(char *)x = (char)ch; // Store the key value in x if not NULL
+        }
+
+        return 1; // Key was pressed
+    }
+
+    return 0; // No key was pressed
+}
+
 void PC_DOSSaveReturn() {}
 void PC_DOSReturn() {}
 void PC_ElapsedInit() {}
@@ -113,9 +144,7 @@ void PC_DispChar (CPU_INT08U x, CPU_INT08U y, char c, CPU_INT08U fgcolor, CPU_IN
 {
     OS_ERR err;
 
-    printf("1\n");
     OSSemPend(&DispStrSem, 0, OS_OPT_PEND_NON_BLOCKING, NULL, &err);                     /* Acquire semaphore to display string              */
-    printf("2\n");
     PC_Attribute(fgcolor, bgcolor);
     PutChar(0x1B);
     PutChar('[');
@@ -124,7 +153,6 @@ void PC_DispChar (CPU_INT08U x, CPU_INT08U y, char c, CPU_INT08U fgcolor, CPU_IN
     PutDec(x);
     PutChar('H');
     PutChar(c);
-    printf("3\n");
     OSSemPost(&DispStrSem, OS_OPT_POST_1, &err);                              /* Release semaphore                                */
 }
 

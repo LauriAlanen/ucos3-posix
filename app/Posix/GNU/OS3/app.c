@@ -87,6 +87,8 @@ int  main (void)
 {
     OS_ERR err;
 
+    PC_DispClrScr();      /* Clear the screen                         */
+
     OSInit(&err);                                               /* Initialize "uC/OS-III, The Real-Time Kernel"         */
 
     OSTaskCreate((OS_TCB     *)&App_TaskStartTCB,               /* Create the start task                                */
@@ -159,13 +161,20 @@ static  void  App_TaskStart (void *p_arg)
 
     while (DEF_TRUE) 
     {                                          /* Task body, always written as an infinite loop.       */
-    	printf("uCOS-III is running.\n");
+        if (PC_GetKey(&key)) 
+        {             
+            printf("Key detected: %c (ASCII: 0x%01X)\n", key, key);
+            if (key == 0x1B) 
+            {                             /* Yes, see if it's the ESCAPE key          */
+                printf("Escape Was Pressed! Exiting...\n");
+                exit(0);  	                           /* End program                              */
+            }
+        }
         OSTimeDlyHMSM(0u, 0u, 1u, 0u,
                       OS_OPT_TIME_HMSM_STRICT,
                       &err);
     }
 }
-
 
 void App_TaskPrintFixedPos(void *p_arg)
 {
@@ -187,7 +196,7 @@ void App_TaskPrintFixedPos(void *p_arg)
     {
         x = 15;                        
         y = 15;                        
-        PC_DispChar(x,y, *((CPU_INT08U *)p_arg), COLOR_BLACK, COLOR_LIGHT_GRAY);
+        PC_DispChar(x, y, *((CPU_INT08U *)p_arg), COLOR_BLACK, COLOR_LIGHT_GRAY);
 
         OSTimeDly(1, OS_OPT_TIME_DLY, &err);
     }
