@@ -16,6 +16,18 @@ OS_SEM DispStrSem;
 
 static struct timeval _t;
 
+/**
+ * @brief Reads a key press from the keyboard in a non-blocking manner.
+ * 
+ * This function temporarily configures the terminal to operate in non-canonical mode,
+ * allowing single-character input without waiting for the Enter key. The terminal is
+ * restored to its original settings after the function completes.
+ * 
+ * @param x A pointer to a variable where the detected key will be stored. If NULL, the key value is not stored.
+ * @return int Returns 1 if a key was pressed, or 0 if no key was pressed.
+ * 
+ * @note This function is specific to Linux/Unix environments and requires <termios.h>, <fcntl.h>, and <unistd.h>.
+ */
 int PC_GetKey(void *x) 
 {
     struct termios oldt, newt;
@@ -38,13 +50,13 @@ int PC_GetKey(void *x)
     {
         if (x != NULL) 
         {
-            *(char *)x = (char)ch; // Store the key value in x if not NULL
+            *(char *)x = (char)ch;
         }
 
-        return 1; // Key was pressed
+        return 1;
     }
 
-    return 0; // No key was pressed
+    return 0;
 }
 
 void PC_DOSSaveReturn() {}

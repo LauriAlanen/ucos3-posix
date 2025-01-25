@@ -107,8 +107,8 @@ int  main (void)
 
     OSStart(&err);                                              /* Start multitasking (i.e. give control to uC/OS-III). */
 
-    while(DEF_ON){												/* Should Never Get Here							    */
-    };
+    /* Should Never Get Here							    */
+    while(DEF_ON) {};
 }
 
 /*
@@ -133,7 +133,7 @@ static  void  App_TaskStart (void *p_arg)
 {
     OS_ERR err;
 
-    CPU_INT16U key;
+    CPU_INT08U key;
     CPU_INT08U symbol;
     symbol = 'X';
 
@@ -163,10 +163,8 @@ static  void  App_TaskStart (void *p_arg)
     {                                          /* Task body, always written as an infinite loop.       */
         if (PC_GetKey(&key)) 
         {             
-            printf("Key detected: %c (ASCII: 0x%01X)\n", key, key);
             if (key == 0x1B) 
             {                             /* Yes, see if it's the ESCAPE key          */
-                printf("Escape Was Pressed! Exiting...\n");
                 exit(0);  	                           /* End program                              */
             }
         }
@@ -194,8 +192,13 @@ void App_TaskPrintFixedPos(void *p_arg)
 
     while (DEF_ON)
     {
-        x = 15;                        
-        y = 15;                        
+        #ifdef RANDOM_POS
+        x = rand() % 50;
+        y = rand() % 15;
+        #else
+        x = 15;
+        y = 15;   
+        #endif               
         PC_DispChar(x, y, *((CPU_INT08U *)p_arg), COLOR_BLACK, COLOR_LIGHT_GRAY);
 
         OSTimeDly(1, OS_OPT_TIME_DLY, &err);

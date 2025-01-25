@@ -4,7 +4,6 @@
 #include  <app_cfg.h>
 #include  <os.h>
 #include  <stdio.h>
-
 #include <pthread.h>
 
 #include  <lib_mem.h>
