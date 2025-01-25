@@ -198,7 +198,7 @@ void  OSInitHook (void)
 
     ERR_CHK(getrlimit(RLIMIT_RTPRIO, &rtprio_limits));
     if (rtprio_limits.rlim_cur != RLIM_INFINITY) {
-        printf("Error: RTPRIO limit is too low. Set to 'unlimited' via 'ulimit -r' or /etc/security/limits.conf\r\n");
+        printf("Error: RTPRIO limit is too low. Set to 'unlimited' via 'sudo prlimit --pid $$ --rtprio=unlimited'\r\n");
         exit(-1);
     }
 
