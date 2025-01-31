@@ -145,6 +145,7 @@ static  void  App_TaskStart (void *p_arg)
     Math_Init();                                                /* Initialize the Mathematical Module                   */
 
     OS_CPU_SysTickInit();
+    OSSemCreate(&RandPrintSem, "Random Print Semaphore", 1, &err);
 
     OSTaskCreate((OS_TCB     *)&App_TaskRandomPrintTCB,               /* Create the start task                                */
                  (CPU_CHAR   *)"App Print Random Position",
@@ -185,7 +186,6 @@ void App_TaskRandomPrint(void *p_arg)
     CPU_INT08U  y;  
 
     OSSemCreate(&DispStrSem, "DispStr Semaphore", 1, &err);
-    OSSemCreate(&RandPrintSem, "Random Print Semaphore", 1, &err);
 
     if (err != OS_ERR_NONE) 
     {
