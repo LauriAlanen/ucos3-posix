@@ -55,6 +55,7 @@ static CPU_STK_SIZE App_TaskStartStk[APP_CFG_TASK_START_STK_SIZE];
 static OS_TCB App_TaskRandomPrintTCB;
 static CPU_STK_SIZE App_TaskRandomPrintStk[TASK_STK_SIZE];
 
+static OS_SEM RandPrintSem;
 
 /*
 *********************************************************************************************************
@@ -161,6 +162,7 @@ static  void  App_TaskStart (void *p_arg)
 
     while (DEF_TRUE) 
     {                
+        OSSemPend(&RandPrintSem, 0, OS_OPT_PEND_BLOCKING, NULL, &err);
         if (PC_GetKey(&key)) 
         {             
             if (key == 0x1B) 
@@ -171,6 +173,7 @@ static  void  App_TaskStart (void *p_arg)
         OSTimeDlyHMSM(0u, 0u, 1u, 0u,
                       OS_OPT_TIME_HMSM_STRICT,
                       &err);
+        OSSemPost(&RandPrintSem, OS_OPT_POST_1, &err);
     }
 }
 
@@ -182,6 +185,7 @@ void App_TaskRandomPrint(void *p_arg)
     CPU_INT08U  y;  
 
     OSSemCreate(&DispStrSem, "DispStr Semaphore", 1, &err);
+    OSSemCreate(&RandPrintSem, "Random Print Semaphore", 1, &err);
 
     if (err != OS_ERR_NONE) 
     {
@@ -190,6 +194,7 @@ void App_TaskRandomPrint(void *p_arg)
 
     srand((unsigned int)pthread_self());
 
+    OSSemPend(&RandPrintSem, 0, OS_OPT_PEND_BLOCKING, NULL, &err);
     for (int i = 0; i < 10; i++)
     {
         #ifdef RANDOM_POS
@@ -208,6 +213,7 @@ void App_TaskRandomPrint(void *p_arg)
                       &err);
         PC_DispClrScr();
     }
+    OSSemPost(&RandPrintSem, OS_OPT_POST_1, &err);
 
     OSTaskDel((OS_TCB*)0, &err);
 }
