@@ -180,9 +180,8 @@ void App_TaskRandomPrint(void *p_arg)
 
     CPU_INT08U  x;
     CPU_INT08U  y;  
-    static CPU_INT08U call_counter = 0;
 
-    OSSemCreate(NULL, "DispStr Semaphore", 1, &err);
+    OSSemCreate(&DispStrSem, "DispStr Semaphore", 1, &err);
 
     if (err != OS_ERR_NONE) 
     {
@@ -191,13 +190,8 @@ void App_TaskRandomPrint(void *p_arg)
 
     srand((unsigned int)pthread_self());
 
-    while (DEF_ON)
+    for (int i = 0; i < 10; i++)
     {
-/*         if (call_counter > 2u)
-        {
-            OSTaskDel(NULL, &err);
-        } */
-    
         #ifdef RANDOM_POS
         x = rand() % 80;
         y = rand() % 25;
@@ -213,6 +207,7 @@ void App_TaskRandomPrint(void *p_arg)
                       OS_OPT_TIME_HMSM_STRICT,
                       &err);
         PC_DispClrScr();
-        call_counter++;
     }
+
+    OSTaskDel((OS_TCB*)0, &err);
 }
