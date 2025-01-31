@@ -40,7 +40,7 @@
 *********************************************************************************************************
 */
 #define TASK_STK_SIZE 4096       /* Size of each task's stacks (# of WORDs)            */
-
+#define RANDOM_POS
 
 /*
 *********************************************************************************************************
@@ -52,8 +52,8 @@ static OS_TCB App_TaskStartTCB;
 static CPU_STK_SIZE App_TaskStartStk[APP_CFG_TASK_START_STK_SIZE];
 
 #define TASK_FIXED_PRINT_POS_PRIO 35
-static OS_TCB App_TaskPrintFixedPosTCB;
-static CPU_STK_SIZE App_TaskPrintFixedPosStk[TASK_STK_SIZE];
+static OS_TCB App_TaskRandomPrintTCB;
+static CPU_STK_SIZE App_TaskRandomPrintStk[TASK_STK_SIZE];
 
 
 /*
@@ -63,7 +63,7 @@ static CPU_STK_SIZE App_TaskPrintFixedPosStk[TASK_STK_SIZE];
 */
 
 static void App_TaskStart(void *p_arg);
-static void App_TaskPrintFixedPos(void *p_arg);
+static void App_TaskRandomPrint(void *p_arg);
 
 
 /*
@@ -145,12 +145,12 @@ static  void  App_TaskStart (void *p_arg)
 
     OS_CPU_SysTickInit();
 
-    OSTaskCreate((OS_TCB     *)&App_TaskPrintFixedPosTCB,               /* Create the start task                                */
-                 (CPU_CHAR   *)"App Print Fixed Position",
-                 (OS_TASK_PTR ) App_TaskPrintFixedPos,
+    OSTaskCreate((OS_TCB     *)&App_TaskRandomPrintTCB,               /* Create the start task                                */
+                 (CPU_CHAR   *)"App Print Random Position",
+                 (OS_TASK_PTR ) App_TaskRandomPrint,
                  (void       *)&symbol,
                  (OS_PRIO     ) TASK_FIXED_PRINT_POS_PRIO,
-                 (CPU_STK    *)&App_TaskPrintFixedPosStk[0],
+                 (CPU_STK    *)&App_TaskRandomPrintStk[0],
                  (CPU_STK     )(TASK_STK_SIZE / 10u),
                  (CPU_STK_SIZE) TASK_STK_SIZE,
                  (OS_MSG_QTY  ) 0,
@@ -160,7 +160,7 @@ static  void  App_TaskStart (void *p_arg)
                  (OS_ERR     *)&err);
 
     while (DEF_TRUE) 
-    {                                          /* Task body, always written as an infinite loop.       */
+    {                
         if (PC_GetKey(&key)) 
         {             
             if (key == 0x1B) 
@@ -174,14 +174,15 @@ static  void  App_TaskStart (void *p_arg)
     }
 }
 
-void App_TaskPrintFixedPos(void *p_arg)
+void App_TaskRandomPrint(void *p_arg)
 {
     OS_ERR err;
 
     CPU_INT08U  x;
-    CPU_INT08U  y;
+    CPU_INT08U  y;  
+    static CPU_INT08U call_counter = 0;
 
-    OSSemCreate(&DispStrSem, "DispStr Semaphore", 1, &err);
+    OSSemCreate(NULL, "DispStr Semaphore", 1, &err);
 
     if (err != OS_ERR_NONE) 
     {
@@ -192,15 +193,26 @@ void App_TaskPrintFixedPos(void *p_arg)
 
     while (DEF_ON)
     {
+/*         if (call_counter > 2u)
+        {
+            OSTaskDel(NULL, &err);
+        } */
+    
         #ifdef RANDOM_POS
-        x = rand() % 50;
-        y = rand() % 15;
+        x = rand() % 80;
+        y = rand() % 25;
         #else
         x = 15;
         y = 15;   
-        #endif               
+        #endif          
+        PC_DispStr(50, 0, "Lauri Alanen", COLOR_BLACK, COLOR_LIGHT_GRAY);
+
         PC_DispChar(x, y, *((CPU_INT08U *)p_arg), COLOR_BLACK, COLOR_LIGHT_GRAY);
 
-        OSTimeDly(1, OS_OPT_TIME_DLY, &err);
+        OSTimeDlyHMSM(0u, 0u, 1u, 0u,
+                      OS_OPT_TIME_HMSM_STRICT,
+                      &err);
+        PC_DispClrScr();
+        call_counter++;
     }
 }

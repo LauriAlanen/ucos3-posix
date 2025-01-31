@@ -5,7 +5,7 @@
 #include  <os.h>
 #include  <stdio.h>
 #include <pthread.h>
-
+#include <stdlib.h>
 #include  <lib_mem.h>
 #include  <lib_math.h>
 

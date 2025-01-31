@@ -35,7 +35,6 @@ void PC_SetTickRate(int ticks);
 void PutChar (char c);
 void PutString (const char *s);
 void SPrintDec(char *s, CPU_INT16U x, CPU_INT08U n);
-CPU_INT08U random (CPU_INT08U n);
 void PutDec (CPU_INT08U x2);
 void PC_Attribute (CPU_INT08U fgcolor, CPU_INT08U bgcolor);
 void PC_DispClrScr (void);

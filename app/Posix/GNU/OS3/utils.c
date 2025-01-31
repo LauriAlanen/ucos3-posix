@@ -112,12 +112,6 @@ void SPrintDec(char *s, CPU_INT16U x, CPU_INT08U n)
     }
 }
 
-CPU_INT08U random (CPU_INT08U n)
-{
-    RndNext = RndNext * 1103515245 + 12345;
-    return ((CPU_INT08U)(RndNext / 256) % (n + 1));
-}
-
 void PutDec (CPU_INT08U x2)
 {
     CPU_INT08U x0;

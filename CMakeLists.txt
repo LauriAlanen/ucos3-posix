@@ -1,5 +1,5 @@
-project ("ucos3-posix")
 cmake_minimum_required(VERSION 3.11)
+project ("ucos3-posix")
   
 set(TARGET_EXE "ucos3-posix")
 set(CMAKE_C_STANDARD 99)
@@ -29,19 +29,19 @@ add_subdirectory(kernel/uC-LIB)
   
 AUX_SOURCE_DIRECTORY(app/Posix/GNU/OS3 APP_SRC)
 
-set(EXAMPLES_BASE_DIR ${CMAKE_SOURCE_DIR}/app/Posix/GNU/OS3)
+set(EXERCISES_BASE_DIR ${CMAKE_SOURCE_DIR}/app/Posix/GNU/OS3)
 
 set(SHARED_SOURCES
-    ${EXAMPLES_BASE_DIR}/utils.c
+    ${EXERCISES_BASE_DIR}/utils.c
 )
 
-file(GLOB EXAMPLE_DIRS ${EXAMPLES_BASE_DIR}/Example-*)
+file(GLOB EXERCISE_DIRS ${EXERCISES_BASE_DIR}/Exercise-*)
 
-foreach(EXAMPLE_DIR ${EXAMPLE_DIRS})
-    if(IS_DIRECTORY ${EXAMPLE_DIR})
-        get_filename_component(EXAMPLE_NAME ${EXAMPLE_DIR} NAME)
+foreach(EXERCISE_DIR ${EXERCISE_DIRS})
+    if(IS_DIRECTORY ${EXERCISE_DIR})
+        get_filename_component(EXAMPLE_NAME ${EXERCISE_DIR} NAME)
 
-        add_executable(${EXAMPLE_NAME} ${EXAMPLE_DIR}/app.c ${SHARED_SOURCES})
+        add_executable(${EXAMPLE_NAME} ${EXERCISE_DIR}/app.c ${SHARED_SOURCES})
 
         target_include_directories(${EXAMPLE_NAME} PRIVATE ${EXAMPLES_BASE_DIR})
 
