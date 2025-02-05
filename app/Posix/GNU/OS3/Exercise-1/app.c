@@ -143,10 +143,19 @@ static  void  App_TaskStart (void *p_arg)
     CPU_Init();
     Mem_Init();                                                 /* Initialize the Memory Management Module              */
     Math_Init();                                                /* Initialize the Mathematical Module                   */
-
     OS_CPU_SysTickInit();
+
     OSSemCreate(&RandPrintSem, "Random Print Semaphore", 1, &err);
+    if (err != OS_ERR_NONE) 
+    {
+        printf("Random Print Semaphore creation failed: %d\n", err);
+    }
+
     OSSemCreate(&DispStrSem, "DispStr Semaphore", 1, &err);
+    if (err != OS_ERR_NONE) 
+    {
+        printf("DispStr Semaphore creation failed: %d\n", err);
+    }
 
     OSTaskCreate((OS_TCB     *)&App_TaskRandomPrintTCB,               /* Create the start task                                */
                  (CPU_CHAR   *)"App Print Random Position",
@@ -186,11 +195,6 @@ void App_TaskRandomPrint(void *p_arg)
     CPU_INT08U  x;
     CPU_INT08U  y;  
 
-    if (err != OS_ERR_NONE) 
-    {
-        printf("Semaphore creation failed: %d\n", err);
-    }
-
     srand((unsigned int)pthread_self());
 
     OSSemPend(&RandPrintSem, 0, OS_OPT_PEND_BLOCKING, NULL, &err);
@@ -213,6 +217,6 @@ void App_TaskRandomPrint(void *p_arg)
         PC_DispClrScr();
     }
     OSSemPost(&RandPrintSem, OS_OPT_POST_1, &err);
-
     OSTaskDel((OS_TCB*)0, &err);
+
 }
