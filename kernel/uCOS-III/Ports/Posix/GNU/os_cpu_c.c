@@ -299,9 +299,14 @@ void  OSTaskDelHook (OS_TCB  *p_tcb)
      same = (pthread_equal(self, p_tcb_ext->Thread) != 0u);
      if (same != DEF_YES) {
          ERR_CHK(pthread_cancel(p_tcb_ext->Thread));
+         OSTaskTerminate(p_tcb);
      }
-
-     OSTaskTerminate(p_tcb);
+     
+     else
+     {
+         ERR_CHK(pthread_cancel(self));
+         OSTaskTerminate(p_tcb);
+     }
 }
 
 
