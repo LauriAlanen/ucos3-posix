@@ -54,8 +54,6 @@ static CPU_STK_SIZE App_TaskStartStk[APP_CFG_TASK_START_STK_SIZE];
 #define TASK_FIXED_PRINT_POS_PRIO 35
 static OS_TCB App_TaskRandomPrintTCB;
 static CPU_STK_SIZE App_TaskRandomPrintStk[TASK_STK_SIZE];
-static OS_TCB App_TaskTestTCB;
-static CPU_STK_SIZE App_TaskTestStk[TASK_STK_SIZE];
 
 static OS_SEM RandPrintSem;
 
@@ -67,7 +65,6 @@ static OS_SEM RandPrintSem;
 
 static void App_TaskStart(void *p_arg);
 static void App_TaskRandomPrint(void *p_arg);
-static void App_TaskTest(void *p_arg);
 
 
 /*
@@ -174,20 +171,6 @@ static  void  App_TaskStart (void *p_arg)
                  (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                  (OS_ERR     *)&err);
 
-    OSTaskCreate((OS_TCB     *)&App_TaskTestTCB,               /* Create the start task                                */
-                 (CPU_CHAR   *)"Task Test1",
-                 (OS_TASK_PTR ) App_TaskTest,
-                 (void       *) 0,
-                 (OS_PRIO     ) TASK_FIXED_PRINT_POS_PRIO - 4,
-                 (CPU_STK    *)&App_TaskTestStk[0],
-                 (CPU_STK     )(TASK_STK_SIZE / 10u),
-                 (CPU_STK_SIZE) TASK_STK_SIZE,
-                 (OS_MSG_QTY  ) 0,
-                 (OS_TICK     ) 0,
-                 (void       *) 0,
-                 (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
-                 (OS_ERR     *)&err);
-
     while (DEF_TRUE) 
     {                
         OSSemPend(&RandPrintSem, 0, OS_OPT_PEND_BLOCKING, NULL, &err);
@@ -205,22 +188,7 @@ static  void  App_TaskStart (void *p_arg)
     }
 }
 
-
-void App_TaskTest(void *p_arg)
-{
-    OS_ERR err;
-
-    while (DEF_ON)
-    {
-        printf("Hello from task!\n");
-        OSTimeDlyHMSM(0u, 0u, 1u, 0u,
-                      OS_OPT_TIME_HMSM_STRICT,
-                      &err);
-    }
-    
-}
-
-void App_TaskRandomPrint(void *p_arg)
+static void App_TaskRandomPrint(void *p_arg)
 {
     OS_ERR err;
 
@@ -234,16 +202,10 @@ void App_TaskRandomPrint(void *p_arg)
     OSSemPend(&RandPrintSem, 0, OS_OPT_PEND_BLOCKING, NULL, &err);
     while(DEF_ON)
     {
-        if (loop_count >= 10)
+        if (loop_count == 10)
         {
             OSSemPost(&RandPrintSem, OS_OPT_POST_1, &err);
-            fprintf(stderr, "Task killing itself!\n");
-            OSTaskDel((OS_TCB*)0, &err);
-        }
-        
-        else if (loop_count == 2)
-        {
-            OSTaskDel(&App_TaskTestTCB, &err);
+            OSTaskDel(DEF_NULL, &err);
         }
 
         #ifdef RANDOM_POS
