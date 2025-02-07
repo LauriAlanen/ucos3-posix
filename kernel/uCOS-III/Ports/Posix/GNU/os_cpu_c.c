@@ -304,8 +304,8 @@ void  OSTaskDelHook (OS_TCB  *p_tcb)
      
      else
      {
-         ERR_CHK(pthread_cancel(self));
          OSTaskTerminate(p_tcb);
+         ERR_CHK(pthread_cancel(self));
      }
 }
 
