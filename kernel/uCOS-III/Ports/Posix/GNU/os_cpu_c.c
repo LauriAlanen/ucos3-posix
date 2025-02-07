@@ -92,6 +92,8 @@ extern  "C" {
                                       } \
                                   } while(0)
 
+
+
 /*
 *********************************************************************************************************
 *                                          LOCAL DATA TYPES
@@ -297,7 +299,8 @@ void  OSTaskDelHook (OS_TCB  *p_tcb)
 
      self = pthread_self();
      same = (pthread_equal(self, p_tcb_ext->Thread) != 0u);
-     if (same != DEF_YES) {
+     if (same != DEF_YES) 
+     {
          ERR_CHK(pthread_cancel(p_tcb_ext->Thread));
          OSTaskTerminate(p_tcb);
      }
