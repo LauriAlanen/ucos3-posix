@@ -1,0 +1,5 @@
+1. Modify the previous task print fixes position to print at a random position. This can be achieved using x = rand() % 80; y = rand() % 25; for x,y coordinates
+
+2. OSTaskDel deletes the running task. This means that the RTOS scheduler wont schedule the task anymore and resources can be freed. Even when OSTaskDel is used it does not mean that the actual code is removed. Just the task does not get any cpu time anymore.
+
+3. Semaphores are used for locking limited recourses and used as a syncronization mechanism for accessing that resource. This means that one task at a time can access the given resource.

@@ -13,6 +13,7 @@
 
 CPU_INT32U          RndNext;          /* Used by random generator */
 OS_SEM DispStrSem;
+OS_SEM RandomSem;
 
 static struct timeval _t;
 
@@ -176,4 +177,23 @@ void PC_DispStr (CPU_INT08U x, CPU_INT08U y, const char *s, CPU_INT08U fgcolor, 
     PutChar('H');
     PutString(s);
     OSSemPost(&DispStrSem, OS_OPT_POST_1 ,&err);                              /* Release semaphore                                */
+}
+
+void Print_to_Screen(const char *text_ptr)
+{
+    OS_ERR err;
+    CPU_INT08U delay;
+    CPU_INT08U symbols[80]= {' '};
+    delay = -1;
+
+    OSSemPend(&RandomSem, 0, OS_OPT_PEND_BLOCKING, DEF_NULL, &err);
+
+    while(delay <= 1 || delay >= 3)
+        delay = rand();
+    OSSemPost(&RandomSem, OS_OPT_POST_1, &err);
+    PC_DispClrScr(); 
+    OSTimeDlyHMSM(0, 0, delay, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    PC_DispStr(33, 15, text_ptr, COLOR_WHITE, COLOR_BLACK);
+    OSTimeDlyHMSM(0, 0, delay, 0, OS_OPT_TIME_HMSM_STRICT, &err);
+    PC_DispStr(33, 0, symbols, COLOR_RED, COLOR_BLACK);
 }

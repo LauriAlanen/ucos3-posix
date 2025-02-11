@@ -21,6 +21,7 @@
 #define  COLOR_YELLOW	0
 
 extern OS_SEM DispStrSem;
+extern OS_SEM RandomSem;
 
 int PC_GetKey(void* x);
 void PC_DOSSaveReturn();
@@ -40,5 +41,6 @@ void PC_Attribute (CPU_INT08U fgcolor, CPU_INT08U bgcolor);
 void PC_DispClrScr (void);
 void PC_DispChar (CPU_INT08U x, CPU_INT08U y, char c, CPU_INT08U fgcolor, CPU_INT08U bgcolor);
 void PC_DispStr (CPU_INT08U x, CPU_INT08U y, const char *s, CPU_INT08U fgcolor, CPU_INT08U bgcolor);
+void Print_to_Screen(const char *text_ptr);
 
 #endif
