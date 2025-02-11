@@ -183,7 +183,7 @@ void Print_to_Screen(const char *text_ptr)
 {
     OS_ERR err;
     CPU_INT08U delay;
-    CPU_INT08U symbols[80]= {' '};
+    const char symbols[80]= {' '};
     delay = -1;
 
     OSSemPend(&RandomSem, 0, OS_OPT_PEND_BLOCKING, DEF_NULL, &err);

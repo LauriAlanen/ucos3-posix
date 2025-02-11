@@ -31,9 +31,6 @@ static CPU_STK_SIZE App_TaskASTK[TASK_STK_SIZE];
 static OS_TCB App_TaskBTCB;
 static CPU_STK_SIZE App_TaskBSTK[TASK_STK_SIZE];
 
-static OS_SEM RandPrintSem;
-
-
 /*
 *********************************************************************************************************
 *                                      LOCAL FUNCTION PROTOTYPES
@@ -65,6 +62,9 @@ int  main (void)
                  (void       *) 0,
                  (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                  (OS_ERR     *)&err);
+
+    OSSemCreate(&DispStrSem, "DispStrSem", 0, &err);
+    OSSemCreate(&RandomSem, "RandomSem", 0, &err);
 
     OSStart(&err);                                              /* Start multitasking (i.e. give control to uC/OS-III). */
 
