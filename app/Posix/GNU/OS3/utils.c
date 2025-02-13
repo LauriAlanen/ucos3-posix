@@ -132,13 +132,13 @@ void PutDec (CPU_INT08U x2)
 }
 
 void PC_Attribute (CPU_INT08U fgcolor, CPU_INT08U bgcolor)
-{/*
+{
     PutChar(0x1b);
     PutChar('[');
     PutDec(30 + fgcolor);
     PutChar(';');
     PutDec(40 + bgcolor);
-    PutChar('m');*/
+    PutChar('m');
 }
 
 void PC_DispClrScr (void)
@@ -151,7 +151,7 @@ void PC_DispChar (CPU_INT08U x, CPU_INT08U y, char c, CPU_INT08U fgcolor, CPU_IN
 {
     OS_ERR err;
 
-    OSSemPend(&DispStrSem, 0, OS_OPT_PEND_NON_BLOCKING, NULL, &err);                     /* Acquire semaphore to display string              */
+    OSSemPend(&DispStrSem, 0, OS_OPT_PEND_NON_BLOCKING, DEF_NULL, &err);                     /* Acquire semaphore to display string              */
     PC_Attribute(fgcolor, bgcolor);
     PutChar(0x1B);
     PutChar('[');
@@ -167,7 +167,7 @@ void PC_DispStr (CPU_INT08U x, CPU_INT08U y, const char *s, CPU_INT08U fgcolor, 
 {
     OS_ERR err;
 
-    OSSemPend(&DispStrSem, 0, OS_OPT_PEND_BLOCKING, NULL,&err);                     /* Acquire semaphore to display string              */
+    OSSemPend(&DispStrSem, 0, OS_OPT_PEND_BLOCKING, DEF_NULL, &err);                     /* Acquire semaphore to display string              */
     PC_Attribute(fgcolor, bgcolor);
     PutChar(0x1B);
     PutChar('[');
@@ -191,6 +191,7 @@ void Print_to_Screen(const char *text_ptr)
     while(delay <= 1 || delay >= 3)
         delay = rand();
     OSSemPost(&RandomSem, OS_OPT_POST_1, &err);
+
     PC_DispClrScr(); 
     OSTimeDlyHMSM(0, 0, delay, 0, OS_OPT_TIME_HMSM_STRICT, &err);
     PC_DispStr(33, 15, text_ptr, COLOR_WHITE, COLOR_BLACK);

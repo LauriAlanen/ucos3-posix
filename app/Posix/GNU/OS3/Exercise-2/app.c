@@ -21,15 +21,14 @@
 */
 
 static OS_TCB App_TaskStartTCB;
-static CPU_STK_SIZE App_TaskStartStk[APP_CFG_TASK_START_STK_SIZE];
+static CPU_STK App_TaskStartStk[APP_CFG_TASK_START_STK_SIZE];
 
-#define TASK_A_PRIORITY 35
-static OS_TCB App_TaskATCB;
-static CPU_STK_SIZE App_TaskASTK[TASK_STK_SIZE];
+#define TASK_GENERIC 32
+static CPU_STK App_TaskGenericPrintStk_A[TASK_STK_SIZE];
+static CPU_STK App_TaskGenericPrintStk_B[TASK_STK_SIZE];
+static OS_TCB App_TaskGenericPrintTCB_A;
+static OS_TCB App_TaskGenericPrintTCB_B;
 
-#define TASK_B_PRIORITY 33
-static OS_TCB App_TaskBTCB;
-static CPU_STK_SIZE App_TaskBSTK[TASK_STK_SIZE];
 
 /*
 *********************************************************************************************************
@@ -38,8 +37,9 @@ static CPU_STK_SIZE App_TaskBSTK[TASK_STK_SIZE];
 */
 
 static void App_TaskStart(void *p_arg);
-static void App_TaskA(void *p_arg);
-static void App_TaskB(void *p_arg);
+static void App_TaskGenericPrint(void *p_arg);
+
+OS_SEM PrintSem;
 
 int  main (void)
 {
@@ -48,6 +48,10 @@ int  main (void)
     PC_DispClrScr();      /* Clear the screen                         */
 
     OSInit(&err);                                               /* Initialize "uC/OS-III, The Real-Time Kernel"         */
+
+    OSSemCreate(&DispStrSem, "DispStrSem", 1, &err);
+    OSSemCreate(&RandomSem, "RandomSem", 1, &err);
+    OSSemCreate(&PrintSem, "PrintSem", 1, &err);
 
     OSTaskCreate((OS_TCB     *)&App_TaskStartTCB,               /* Create the start task                                */
                  (CPU_CHAR   *)"App Task Start",
@@ -63,8 +67,6 @@ int  main (void)
                  (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                  (OS_ERR     *)&err);
 
-    OSSemCreate(&DispStrSem, "DispStrSem", 0, &err);
-    OSSemCreate(&RandomSem, "RandomSem", 0, &err);
 
     OSStart(&err);                                              /* Start multitasking (i.e. give control to uC/OS-III). */
 
@@ -83,12 +85,12 @@ static  void  App_TaskStart (void *p_arg)
     Math_Init();                                                /* Initialize the Mathematical Module                   */
     OS_CPU_SysTickInit();
 
-    OSTaskCreate((OS_TCB     *)&App_TaskATCB,
-                 (CPU_CHAR   *)"App Task A",
-                 (OS_TASK_PTR ) App_TaskA,
-                 (void       *) 0,
-                 (OS_PRIO     ) TASK_A_PRIORITY,
-                 (CPU_STK    *)&App_TaskASTK[0],
+    OSTaskCreate((OS_TCB     *)&App_TaskGenericPrintTCB_A,
+                 (CPU_CHAR   *)"App Task Generic A",
+                 (OS_TASK_PTR ) App_TaskGenericPrint,
+                 (void       *) "Hi, task A here",
+                 (OS_PRIO     ) TASK_GENERIC,
+                 (CPU_STK    *)&App_TaskGenericPrintStk_A[0],
                  (CPU_STK     )(TASK_STK_SIZE / 10u),
                  (CPU_STK_SIZE) TASK_STK_SIZE,
                  (OS_MSG_QTY  ) 0,
@@ -97,12 +99,12 @@ static  void  App_TaskStart (void *p_arg)
                  (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                  (OS_ERR     *)&err);
 
-    OSTaskCreate((OS_TCB     *)&App_TaskBTCB,
-                 (CPU_CHAR   *)"App Task B",
-                 (OS_TASK_PTR ) App_TaskB,
-                 (void       *) 0,
-                 (OS_PRIO     ) TASK_B_PRIORITY,
-                 (CPU_STK    *)&App_TaskBSTK[0],
+    OSTaskCreate((OS_TCB     *)&App_TaskGenericPrintTCB_B,
+                 (CPU_CHAR   *)"App Task Generic B",
+                 (OS_TASK_PTR ) App_TaskGenericPrint,
+                 (void       *) "Hello from task B",
+                 (OS_PRIO     ) TASK_GENERIC - 1,
+                 (CPU_STK    *)&App_TaskGenericPrintStk_B[0],
                  (CPU_STK     )(TASK_STK_SIZE / 10u),
                  (CPU_STK_SIZE) TASK_STK_SIZE,
                  (OS_MSG_QTY  ) 0,
@@ -110,7 +112,6 @@ static  void  App_TaskStart (void *p_arg)
                  (void       *) 0,
                  (OS_OPT      )(OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR),
                  (OS_ERR     *)&err);
-
 
     while (DEF_TRUE) 
     {
@@ -120,30 +121,20 @@ static  void  App_TaskStart (void *p_arg)
     }
 }
 
-static void App_TaskA(void *p_arg)
+
+static void App_TaskGenericPrint(void *p_arg)
 {
     OS_ERR err;
-    const char *msg = "Hello from task A";
 
+    const char* msg = (char*)(p_arg); 
+    
     while (DEF_ON)
     {
+        OSSemPend(&PrintSem, 0, OS_OPT_PEND_BLOCKING, DEF_NULL, &err);
         Print_to_Screen(msg);
+        OSSemPost(&PrintSem, OS_OPT_POST_1, &err);
         OSTimeDlyHMSM(0u, 0u, 1u, 0u,
-                OS_OPT_TIME_HMSM_STRICT,
-                &err);
-    }
-}
-
-static void App_TaskB(void *p_arg)
-{
-    OS_ERR err;
-    const char *msg = "Hello from task B";
-
-    while (DEF_ON)
-    {
-        Print_to_Screen(msg);
-        OSTimeDlyHMSM(0u, 0u, 1u, 0u,
-                OS_OPT_TIME_HMSM_STRICT,
-                &err);
-    }
+            OS_OPT_TIME_HMSM_STRICT,
+            &err);
+        }
 }
